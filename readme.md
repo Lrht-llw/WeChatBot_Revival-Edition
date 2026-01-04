@@ -1,5 +1,5 @@
 # 停止维护
-本仓库已停止维护
+- 本仓库已停止维护
 
 # 说明
 - 这是一个智能微信聊天机器人。通过wxautox_wechatbot收发微信消息，调用deepseek、gpt、gemini等大语言模型生成回复消息。
@@ -47,8 +47,8 @@
 7. 修改完配置后点击页面右上角'Start Bot'启动程序
 8. 如果想要自定义表情包请将表情包(.gif .png .jpg .jpeg)文件放入emojis文件夹中对应的情绪文件夹内（可以自己添加情绪种类）
 
-# 联系我
-QQ 2025128651
+# 联系我们
+- https://work.weixin.qq.com/kfid/kfc7faf7fc2158442f6
 
 # 声明
 - 本项目基于 [KouriChat](https://github.com/KouriChat/KouriChat) 修改(原My-Dream-Moments项目)，遵循 **GNU GPL-3.0 或更高版本** 许可证，原项目版权归属：umaru (2025)。

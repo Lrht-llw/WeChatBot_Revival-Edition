@@ -24,7 +24,6 @@ from typing import Optional
 import pyautogui
 import shutil
 import re
-import ast
 from config import *
 import queue
 import json
@@ -32,17 +31,19 @@ from threading import Timer
 from bs4 import BeautifulSoup
 from urllib.parse import urlparse
 import os
+import ctypes
+os.environ["PROJECT_NAME"] = 'iwyxdxl/WeChatBot_WXAUTO_SE'
 try:
-    from wxautox_wechatbot import WeChat
-    from wxautox_wechatbot.param import WxParam
+    from wxautox4_wechatbot import WeChat
+    from wxautox4_wechatbot.param import WxParam
     WxParam.ENABLE_FILE_LOGGER = False
     WxParam.FORCE_MESSAGE_XBIAS = True
-    os.environ["PROJECT_NAME"] = 'iwyxdxl/WeChatBot_WXAUTO_SE'
+
 except ImportError:
     try:
-        from wxautox import WeChat
+        from wxautox4_wechatbot import WeChat
     except ImportError:
-        from wxauto import WeChat
+        from wxautox4_wechatbot import WeChat
 
 # 生成用户昵称列表和prompt映射字典
 user_names = [entry[0] for entry in LISTEN_LIST]
@@ -152,10 +153,10 @@ def get_dynamic_config(key, default_value=None):
             elif value_str.replace('.', '').isdigit():
                 return float(value_str)
             else:
-                # 使用安全的字面量解析
+                # 尝试eval（注意：在生产环境中需要更安全的方法）
                 try:
-                    return ast.literal_eval(value_str)
-                except Exception:
+                    return eval(value_str)
+                except:
                     return value_str.strip("'\"")
         return default_value
     except Exception as e:
@@ -184,12 +185,6 @@ recurring_reminder_lock = threading.RLock() # 锁，用于处理提醒文件和�
 active_timers = {} # { (user_id, timer_id): Timer_object } (用于短期一次性提醒 < 10min)
 timer_lock = threading.Lock()
 next_timer_id = 0
-
-# 提醒功能的资源限制（防止拒绝服务攻击）
-MAX_ACTIVE_TIMERS_PER_USER = 10  # 每个用户最多10个活动的短期提醒
-MAX_RECURRING_REMINDERS_PER_USER = 20  # 每个用户最多20个每日重复提醒
-MAX_ONEOFF_REMINDERS_PER_USER = 30  # 每个用户最多30个长期一次性提醒
-MAX_REMINDER_MESSAGE_LENGTH = 500  # 提醒消息最大长度
 
 class AsyncHTTPHandler(logging.Handler):
     def __init__(self, url, retry_attempts=3, timeout=3, max_queue_size=1000, batch_size=20, batch_timeout=5):
@@ -228,51 +223,10 @@ class AsyncHTTPHandler(logging.Handler):
         self.failed_requests = 0
         self.last_success_time = time.time()
         
-        # Waitress优化: 使用Session实现连接池复用
-        self.session = requests.Session()
-        # 配置连接池参数（适配Waitress的连接限制）
-        adapter = requests.adapters.HTTPAdapter(
-            pool_connections=2,      # 连接池数量
-            pool_maxsize=5,          # 最大连接数
-            max_retries=0,           # 禁用requests内置重试，使用自定义重试逻辑
-            pool_block=False         # 非阻塞模式
-        )
-        self.session.mount('http://', adapter)
-        self.session.mount('https://', adapter)
-        # 设置默认请求头（优化Waitress通信）
-        self.session.headers.update({
-            'User-Agent': 'WeChatBot-Logger/2.0',
-            'Connection': 'keep-alive',  # 启用HTTP Keep-Alive
-            'Accept-Encoding': 'gzip, deflate'  # 支持压缩
-        })
-        
         # 后台线程用于处理日志队列
         self.worker = threading.Thread(target=self._process_queue, daemon=True)
         self.worker.start()
-        
-        # 测试连接到配置编辑器
-        self._test_connection()
 
-    def _test_connection(self):
-        """测试到配置编辑器的连接"""
-        try:
-            # 使用非阻塞方式测试连接，超时时间短
-            resp = self.session.get(
-                f'http://localhost:{PORT}/',
-                timeout=2
-            )
-            if resp.status_code == 200:
-                print(f"\033[32m✓ 成功连接到配置编辑器服务器 (端口 {PORT})\033[0m")
-                print(f"\033[32m✓ 日志将实时发送到网页端\033[0m")
-            else:
-                print(f"\033[33m警告: 配置编辑器服务器响应异常 (状态码 {resp.status_code})\033[0m")
-        except requests.exceptions.ConnectionError:
-            print(f"\033[33m警告: 无法连接到配置编辑器服务器 (端口 {PORT})\033[0m")
-            print(f"\033[33m提示: 日志只会显示在控制台，不会发送到网页端\033[0m")
-            print(f"\033[33m解决: 如需网页端查看日志，请先启动 config_editor.py\033[0m")
-        except Exception as e:
-            print(f"\033[33m警告: 连接测试失败: {str(e)[:50]}\033[0m")
-    
     def emit(self, record):
         """
         格式化日志记录并尝试将其放入队列。
@@ -310,11 +264,11 @@ class AsyncHTTPHandler(logging.Handler):
 
     def _process_queue(self):
         """
-        后台工作线程，积累一定数量的日志后批量发送到Waitress服务器。
-        使用连接池复用提升性能。
+        后台工作线程，积累一定数量的日志后批量发送到目标 URL。
         """
         headers = {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'User-Agent': 'WeChatBot/1.0'
         }
         batch = []  # 用于存储批处理日志
         last_batch_time = time.time()  # 上次发送批处理的时间
@@ -344,9 +298,6 @@ class AsyncHTTPHandler(logging.Handler):
                         if success:
                             self.consecutive_failures = 0  # 重置失败计数
                             self.last_success_time = time.time()
-                            # 清空批次
-                            batch = []
-                            last_batch_time = current_time
                         else:
                             self.consecutive_failures += 1
                             self.failed_requests += 1
@@ -354,19 +305,14 @@ class AsyncHTTPHandler(logging.Handler):
                                 # 打开断路器
                                 self.circuit_breaker_open = True
                                 self.circuit_breaker_reset_time = time.time() + self.CIRCUIT_BREAKER_RESET_TIMEOUT
-                                print(f"\033[33m警告: 日志发送连续失败 {self.consecutive_failures} 次，断路器开启 {self.CIRCUIT_BREAKER_RESET_TIMEOUT} 秒\033[0m")
-                                print(f"\033[33m提示: 请确保配置编辑器(config_editor.py)正在运行，端口 {PORT}\033[0m")
-                            # 发送失败也清空批次，避免队列堵塞
-                            batch = []
-                            last_batch_time = current_time
+                                logging.warning(f"日志发送连续失败 {self.consecutive_failures} 次，断路器开启 {self.CIRCUIT_BREAKER_RESET_TIMEOUT} 秒")
                     else:
-                        # 断路器开启，只在特定时间输出警告，避免刷屏
-                        if len(batch) >= self.batch_size:  # 只在批次满时才输出
-                            reset_remaining = self.circuit_breaker_reset_time - time.time() if self.circuit_breaker_reset_time else 0
-                            print(f"\033[33m断路器开启中，暂不发送 {len(batch)} 条日志，将在 {reset_remaining:.1f} 秒后尝试恢复\033[0m")
-                        # 断路器开启时，清空批次以避免内存积累
-                        batch = []
-                        last_batch_time = current_time
+                        # 断路器开启，暂时不发送
+                        reset_remaining = self.circuit_breaker_reset_time - time.time() if self.circuit_breaker_reset_time else 0
+                        logging.debug(f"断路器开启状态，暂不发送 {len(batch)} 条日志，将在 {reset_remaining:.1f} 秒后尝试恢复")
+                    
+                    batch = []  # 无论是否发送成功，都清空批次
+                    last_batch_time = current_time  # 重置批处理时间
             
             except Exception as e:
                 # 出错时清空当前批次，避免卡住
@@ -381,83 +327,53 @@ class AsyncHTTPHandler(logging.Handler):
 
     def _send_batch(self, batch, headers):
         """
-        发送一批日志记录到Waitress服务器，使用连接池和改进的重试策略
+        发送一批日志记录，使用改进的重试策略
         
         返回:
             bool: 是否成功发送
         """
         data = {'logs': batch}
         
-        # Waitress优化: 调整超时和重试参数
-        MAX_RETRY_DELAY = 3.0  # 最大重试延迟（秒），Waitress处理能力更强
-        BASE_DELAY = 0.3       # 基础延迟（秒），降低以利用Waitress快速响应
+        # 改进1: 使用固定的最大重试延迟上限
+        MAX_RETRY_DELAY = 2.0  # 最大重试延迟（秒）
+        BASE_DELAY = 0.5       # 基础延迟（秒）
         
         self.total_requests += 1
         
         for attempt in range(self.retry_attempts):
             try:
-                # 使用session发送请求，复用连接
-                resp = self.session.post(
+                resp = requests.post(
                     self.url,
                     json=data,
                     headers=headers,
-                    timeout=(self.timeout, self.timeout * 2)  # (连接超时, 读取超时)
+                    timeout=self.timeout
                 )
                 resp.raise_for_status()  # 检查 HTTP 错误状态码
-                
                 # 成功发送，记录日志数量
                 if attempt > 0:
-                    logging.info(f"在第 {attempt+1} 次尝试后成功发送 {len(batch)} 条日志 [Waitress]")
+                    logging.info(f"在第 {attempt+1} 次尝试后成功发送 {len(batch)} 条日志")
                 else:
-                    logging.debug(f"成功批量发送 {len(batch)} 条日志 [Waitress]")
+                    logging.debug(f"成功批量发送 {len(batch)} 条日志")
                 return True  # 成功返回
-                
-            except requests.exceptions.Timeout as e:
-                # Waitress超时处理（通常意味着服务器负载高）
-                logging.warning(f"日志发送超时 (尝试 {attempt+1}/{self.retry_attempts}) - Waitress可能繁忙")
-                delay = min(BASE_DELAY * 1.2, MAX_RETRY_DELAY)  # 轻微延迟
-                
-            except requests.exceptions.ConnectionError as e:
-                # 连接错误（可能是Waitress重启或网络问题）
-                error_msg = str(e)
-                if 'Connection refused' in error_msg or 'Connection aborted' in error_msg:
-                    if attempt == 0:  # 只在第一次尝试时输出到控制台
-                        print(f"\033[33m警告: 无法连接到配置编辑器服务器 (端口 {PORT})\033[0m")
-                        print(f"\033[33m提示: 请确保 config_editor.py 正在运行\033[0m")
-                    logging.warning(f"无法连接到Waitress服务器 (尝试 {attempt+1}/{self.retry_attempts})")
-                else:
-                    logging.warning(f"日志发送连接错误 (尝试 {attempt+1}/{self.retry_attempts}): {error_msg[:100]}")
-                delay = min(BASE_DELAY * (2 ** attempt), MAX_RETRY_DELAY)  # 指数退避
-                
-            except requests.exceptions.HTTPError as e:
-                # HTTP错误（4xx, 5xx）
-                status_code = e.response.status_code if e.response else 'Unknown'
-                if status_code >= 500:
-                    # 服务器错误，可以重试
-                    logging.warning(f"Waitress服务器错误 {status_code} (尝试 {attempt+1}/{self.retry_attempts})")
-                    delay = min(BASE_DELAY * (1.5 ** attempt), MAX_RETRY_DELAY)
-                else:
-                    # 客户端错误，不应该重试
-                    logging.error(f"日志请求被拒绝，状态码 {status_code}")
-                    return False
-                    
             except requests.exceptions.RequestException as e:
-                # 其他请求异常
-                logging.warning(f"日志发送异常 (尝试 {attempt+1}/{self.retry_attempts}): {str(e)[:100]}")
-                delay = min(BASE_DELAY * (1.5 ** attempt), MAX_RETRY_DELAY)
+                # 改进2: 根据错误类型区分处理
+                if isinstance(e, requests.exceptions.Timeout):
+                    logging.warning(f"日志发送超时 (尝试 {attempt+1}/{self.retry_attempts})")
+                    delay = min(BASE_DELAY, MAX_RETRY_DELAY)  # 对超时使用较短的固定延迟
+                elif isinstance(e, requests.exceptions.ConnectionError):
+                    logging.warning(f"日志发送连接错误 (尝试 {attempt+1}/{self.retry_attempts}): {e}")
+                    delay = min(BASE_DELAY * (1.5 ** attempt), MAX_RETRY_DELAY)  # 有限的指数退避
+                else:
+                    logging.warning(f"日志发送失败 (尝试 {attempt+1}/{self.retry_attempts}): {e}")
+                    delay = min(BASE_DELAY * (1.5 ** attempt), MAX_RETRY_DELAY)  # 有限的指数退避
                 
-            except Exception as e:
-                # 未预期的异常
-                logging.error(f"发送日志时发生未知错误: {str(e)[:100]}", exc_info=True)
-                return False
-            
-            # 最后一次尝试不需要等待
-            if attempt < self.retry_attempts - 1:
-                time.sleep(delay)
+                # 最后一次尝试不需要等待
+                if attempt < self.retry_attempts - 1:
+                    time.sleep(delay)
         
-        # 所有重试都失败
+        # 改进3: 所有重试都失败，记录警告并返回失败状态
         downtime = time.time() - self.last_success_time
-        logging.error(f"发送日志批次失败，已达到最大重试次数 ({self.retry_attempts})，丢弃 {len(batch)} 条日志 [连续失败: {self.consecutive_failures+1}, 持续时间: {downtime:.1f}秒]")
+        logging.error(f"发送日志批次失败，已达到最大重试次数 ({self.retry_attempts})，丢弃 {len(batch)} 条日志 (连续失败: {self.consecutive_failures+1}, 持续时间: {downtime:.1f}秒)")
         return False  # 返回失败状态
     
     def get_stats(self):
@@ -474,7 +390,7 @@ class AsyncHTTPHandler(logging.Handler):
 
     def close(self):
         """
-        停止工作线程并等待队列处理完成（或超时），关闭Waitress连接。
+        停止工作线程并等待队列处理完成（或超时）。
         """
         if not self.log_queue.empty():
             logging.info(f"关闭日志处理器，还有 {self.log_queue.qsize()} 条日志待处理")
@@ -491,13 +407,6 @@ class AsyncHTTPHandler(logging.Handler):
             logging.warning("日志处理线程未能正常退出")
         else:
             logging.info("日志处理线程已正常退出")
-        
-        # 关闭session，释放Waitress连接池资源
-        try:
-            self.session.close()
-            logging.debug("HTTP Session已关闭，连接池资源已释放 [Waitress]")
-        except Exception as e:
-            logging.warning(f"关闭HTTP Session时发生异常: {e}")
         
         super().close()
 
@@ -527,10 +436,31 @@ logger.addHandler(console_handler)
 
 # 获取微信窗口对象
 try:
+    logger.info("\033[32m正在初始化微信接口...\033[0m")
     wx = WeChat()
-except:
-    logger.error(f"\033[31m无法初始化微信接口，请确保您安装的是微信3.9版本，并且已经登录！\033[0m")
-    logger.error("\033[31m微信3.9版本下载地址：https://dldir1v6.qq.com/weixin/Windows/WeChatSetup.exe \033[0m")
+    logger.info("\033[32m微信接口初始化成功！\033[0m")
+except Exception as e:
+    logger.error("\033[31m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m")
+    logger.error("\033[31m初始化微信接口失败！\033[0m")
+    logger.error(f"\033[31m错误: {e}\033[0m")
+    logger.error("\033[31m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m")
+    logger.error("")
+    logger.error("\033[33m📋 解决方案：\033[0m")
+    logger.error("")
+    logger.error("\033[36m方案1: 重启微信\033[0m")
+    logger.error("\033[90m   → 适用场景: 出现'NoneType'或'窗口未找到'错误\033[0m")
+    logger.error("\033[90m   → 操作步骤: 完全退出微信 → 重新打开 → 登录后再运行\033[0m")
+    logger.error("")
+    logger.error("\033[36m方案2: 重启Run.bat\033[0m")
+    logger.error("\033[90m   → 适用场景: 刚导入配置，出现404错误\033[0m")
+    logger.error("\033[90m   → 操作步骤: 关闭当前窗口 → 重新运行Run.bat\033[0m")
+    logger.error("")
+    logger.error("\033[36m方案3: 检查微信版本\033[0m")
+    logger.error("\033[90m   → 适用场景: 上述方法无效，可能版本不兼容\033[0m")
+    logger.error("\033[90m   → 要求版本: 微信4.1.2\033[0m")
+    logger.error(f"\033[90m   → 下载地址: https://www.123865.com/s/tB1wvd-LWaAA\033[0m")
+    logger.error("")
+    logger.error("\033[31m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m")
     exit(1)
 # 获取登录用户的名字
 ROBOT_WX_NAME = wx.nickname
@@ -776,26 +706,15 @@ def on_user_message(user):
         user_names.append(user)
     reset_user_timer(user)
 
-# 修改get_user_prompt函数（增强路径验证）
+# 修改get_user_prompt函数
 def get_user_prompt(user_id):
     # 查找映射中的文件名，若不存在则使用user_id
     prompt_file = prompt_mapping.get(user_id, user_id)
-    
-    # 双重清理文件名
-    safe_prompt_file = sanitize_user_id_for_filename(prompt_file)
-    
-    # 使用绝对路径并验证
-    prompts_dir = os.path.abspath(os.path.join(root_dir, 'prompts'))
-    prompt_path = os.path.abspath(os.path.join(prompts_dir, f'{safe_prompt_file}.md'))
-    
-    # 验证最终路径是否在预期目录内，防止路径遍历
-    if not prompt_path.startswith(prompts_dir + os.sep):
-        logger.error(f"检测到路径遍历尝试: user_id={user_id}, prompt_file={prompt_file}, path={prompt_path}")
-        raise ValueError(f"非法的prompt文件路径访问尝试")
+    prompt_path = os.path.join(root_dir, 'prompts', f'{prompt_file}.md')
     
     if not os.path.exists(prompt_path):
         logger.error(f"Prompt文件不存在: {prompt_path}")
-        raise FileNotFoundError(f"Prompt文件 {safe_prompt_file}.md 未找到于 prompts 目录")
+        raise FileNotFoundError(f"Prompt文件 {prompt_file}.md 未找到于 prompts 目录")
 
     # 增强编码处理的文件读取
     prompt_content = None
@@ -1231,7 +1150,7 @@ def call_assistant_api_with_retry(messages_to_send, user_id, max_retries=2, is_s
                 logger.error("\033[31m错误：API 服务商反馈 API KEY 不可用，请检查配置选项！\033[0m")
             elif "service unavailable" in error_info:
                 logger.error("\033[31m错误：API 服务商反馈服务器繁忙，请稍后再试！\033[0m")
-            elif "sensitive words detected" in error_info or "sensitive_words_detected" in error_info:
+            elif "sensitive words detected" in error_info or "sensitive" in error_info:
                 logger.error("\033[31m错误：提示词中含有敏感词，无法生成回复，请联系API服务商！\033[0m")
                 if ENABLE_SENSITIVE_CONTENT_CLEARING:
                     logger.warning(f"已开启敏感词自动清除上下文功能，开始清除用户 {user_id} 的聊天上下文和临时记忆")
@@ -1302,15 +1221,11 @@ def message_listener(msg, chat):
         else:
             original_content = f"[收到拍一拍消息]：{original_content}"
     elif msgattr == 'self':
-        # 保存机器人自己发送的消息，用于拍一拍自己和撤回功能
-        if msgtype == 'text':
-            global bot_last_sent_msg
-            bot_last_sent_msg[who] = msg
-            logger.debug(f"已保存机器人发送给 {who} 的最后消息对象")
-            return
-        else:
-            logger.debug(f"非文本消息，已忽略。")
-            return
+        # 保存机器人自己发送的消息，用于拍一拍自己功能
+        global bot_last_sent_msg
+        bot_last_sent_msg[who] = msg
+        logger.debug(f"已保存机器人发送给 {who} 的最后消息对象")
+        return  # 不处理机器人自己的消息
     elif msgattr != 'friend':
         logger.info(f"非好友消息，已忽略。")
         return
@@ -1583,84 +1498,9 @@ def handle_emoji_message(msg, who):
         emoji_timer = threading.Timer(3.0, timer_callback)
         emoji_timer.start()
 
-def is_safe_url(url: str) -> bool:
-    """
-    验证URL是否安全，防止SSRF攻击。
-    
-    Args:
-        url: 要验证的URL
-        
-    Returns:
-        bool: URL是否安全
-    """
-    try:
-        import socket
-        import ipaddress
-        
-        parsed = urlparse(url)
-        
-        # 1. 只允许HTTP和HTTPS协议
-        if parsed.scheme not in ['http', 'https']:
-            logger.warning(f"不允许的协议: {parsed.scheme}")
-            return False
-        
-        # 2. 获取主机名
-        hostname = parsed.hostname
-        if not hostname:
-            logger.warning("URL中没有主机名")
-            return False
-        
-        # 3. 解析IP地址并检查是否为内网地址
-        try:
-            # 解析域名到IP
-            ip = socket.gethostbyname(hostname)
-            ip_obj = ipaddress.ip_address(ip)
-            
-            # 检查是否为私有地址、回环地址、链路本地地址等
-            if (ip_obj.is_private or 
-                ip_obj.is_loopback or 
-                ip_obj.is_link_local or
-                ip_obj.is_reserved or
-                ip_obj.is_multicast):
-                logger.warning(f"禁止访问内网/特殊地址: {hostname} -> {ip}")
-                return False
-            
-            # 额外检查：禁止访问云元数据服务
-            if ip.startswith('169.254.'):
-                logger.warning(f"禁止访问云元数据服务: {hostname} -> {ip}")
-                return False
-                
-        except socket.gaierror:
-            # 域名无法解析
-            logger.warning(f"域名无法解析: {hostname}")
-            return False
-        except ValueError as e:
-            # IP地址格式错误
-            logger.warning(f"IP地址格式错误: {hostname}, 错误: {e}")
-            return False
-        
-        # 4. 端口限制（只允许常见的HTTP/HTTPS端口）
-        port = parsed.port
-        allowed_ports = [80, 443, 8080, 8443]
-        if port and port not in allowed_ports:
-            logger.warning(f"不允许的端口: {port}, 仅允许: {allowed_ports}")
-            return False
-        
-        # 5. URL长度限制
-        if len(url) > 2048:
-            logger.warning(f"URL过长: {len(url)} 字符")
-            return False
-        
-        return True
-        
-    except Exception as e:
-        logger.error(f"URL安全验证失败: {url}, 错误: {e}")
-        return False
-
 def fetch_and_extract_text(url: str) -> Optional[str]:
     """
     获取给定 URL 的网页内容并提取主要文本。
-    已增强SSRF防护。
 
     Args:
         url (str): 要抓取的网页链接。
@@ -1669,12 +1509,7 @@ def fetch_and_extract_text(url: str) -> Optional[str]:
         Optional[str]: 提取并清理后的网页文本内容（限制了最大长度），如果失败则返回 None。
     """
     try:
-        # SSRF防护 - 验证URL安全性
-        if not is_safe_url(url):
-            logger.warning(f"URL安全检查失败，拒绝访问: {url}")
-            return None
-        
-        # 基本 URL 格式验证
+        # 基本 URL 格式验证 (非常基础)
         parsed_url = urlparse(url)
         if not all([parsed_url.scheme, parsed_url.netloc]):
              logger.warning(f"无效的URL格式，跳过抓取: {url}")
@@ -1682,31 +1517,7 @@ def fetch_and_extract_text(url: str) -> Optional[str]:
 
         headers = {'User-Agent': REQUESTS_USER_AGENT}
         logger.info(f"开始抓取链接内容: {url}")
-        
-        # 使用自定义Session处理跳转，验证每个跳转目标的安全性
-        session = requests.Session()
-        session.headers.update(headers)
-        session.max_redirects = 5  # 限制最大跳转次数
-        
-        # 创建钩子函数，在每次跳转前验证URL安全性
-        def check_redirect_safety(response, *args, **kwargs):
-            if response.is_redirect:
-                redirect_url = response.headers.get('Location', '')
-                # 处理相对路径
-                from urllib.parse import urljoin
-                absolute_redirect = urljoin(response.url, redirect_url)
-                
-                # 验证跳转目标的安全性
-                if not is_safe_url(absolute_redirect):
-                    logger.warning(f"跳转目标不安全，已阻止: {response.url} -> {absolute_redirect}")
-                    raise requests.exceptions.RequestException(f"不安全的跳转目标: {absolute_redirect}")
-                
-                logger.debug(f"安全跳转: {response.url} -> {absolute_redirect}")
-        
-        session.hooks['response'].append(check_redirect_safety)
-        
-        # 发送请求，允许经过安全验证的跳转
-        response = session.get(url, timeout=REQUESTS_TIMEOUT, allow_redirects=True, verify=True)
+        response = requests.get(url, headers=headers, timeout=REQUESTS_TIMEOUT, allow_redirects=True)
         response.raise_for_status()  # 检查HTTP请求是否成功 (状态码 2xx)
 
         # 检查内容类型，避免处理非HTML内容（如图片、PDF等）
@@ -1857,17 +1668,7 @@ def _schedule_restart(reason: str = "指令触发"):
                     pass
             clean_up_temp_files()
             logger.info(f"正在执行重启 (原因: {reason}) ...")
-            
-            # 使用subprocess.Popen而不是os.execv，避免命令注入风险
-            import subprocess
-            current_script = os.path.abspath(__file__)
-            # 只传递脚本路径，不传递sys.argv中可能存在的危险参数
-            subprocess.Popen(
-                [sys.executable, current_script],
-                cwd=os.path.dirname(current_script)
-            )
-            logger.info("新进程已启动，当前进程即将退出")
-            sys.exit(0)
+            os.execv(sys.executable, ['python'] + sys.argv)
         except Exception as e:
             logger.error(f"执行重启失败: {e}", exc_info=True)
     threading.Timer(1.5, _do_restart).start()
@@ -2020,16 +1821,18 @@ def handle_wxauto_message(msg, who):
                 for attempt in range(3):
                     try:
                         img_path = msg.download()
-                        if img_path:
+                        if img_path and os.path.exists(str(img_path)):
                             logger.info(f"图片下载成功 (第{attempt + 1}次尝试): {img_path}")
                             break
                         else:
-                            logger.warning(f"图片下载失败 (第{attempt + 1}次尝试)")
+                            logger.warning(f"图片下载返回空路径 (第{attempt + 1}次尝试)")
+                    except AttributeError as attr_err:
+                        logger.warning(f"控件属性错误 (第{attempt + 1}次): {attr_err}")
                     except Exception as e:
-                        logger.warning(f"图片下载异常 (第{attempt + 1}次尝试): {e}")
+                        logger.warning(f"图片下载异常 (第{attempt + 1}次): {e}")
                     
-                    if attempt < 2:  # 不是最后一次尝试
-                        time.sleep(0.5)  # 等待0.5秒后重试
+                    if attempt < 2:
+                        time.sleep(1.5)  # 增加等待时间到1.5秒
                 
                 if img_path:
                     is_emoji = False
@@ -2037,6 +1840,7 @@ def handle_wxauto_message(msg, who):
                     logger.info(f"检测到图片消息，准备识别: {img_path}")
                 else:
                     logger.error("图片下载失败，已重试3次")
+                    logger.error("\033[31m⚠️ 图片识别功能异常，请查看解决方案：https://s.apifox.cn/b2f07354-bce7-4959-a803-97ed82c508ff/7649190m0\033[0m")
             else:
                 logger.info("检测到图片消息，但图片识别功能已禁用。")
 
@@ -2374,11 +2178,25 @@ def send_reply(user_id, sender_name, username, original_merged_message, reply, i
                     logger.error(f"撤回机器人消息失败: {str(e)}")
                 time.sleep(random.uniform(2.0, 3.0))  # 撤回后延迟
             else:
+                # 验证发送内容（只处理一次）
+                content_clean = content.strip() if content else ''
+                if not content_clean:
+                    logger.error(f"尝试发送空内容给 {user_id}，已跳过")
+                    continue
+                if len(content_clean) <= 3 and content_clean.upper() in ['AV', 'A', 'V']:
+                    logger.error(f"检测到异常内容 '{content_clean}'，拒绝发送给 {user_id}")
+                    continue
+                
                 # 文本消息发送三次重试
                 success = False
                 for attempt in range(3):
                     try:
-                        if wx.SendMsg(msg=content, who=user_id):
+                        time.sleep(random.uniform(4.0, 6.0))
+                        logger.info(f"[DEBUG] 准备发送内容给 {user_id}: {repr(content[:100])}")
+                        time.sleep(0.15)  # 短暂延时，让微信窗口稳定
+                        send_result = wx.SendMsg(msg=content, who=user_id)
+                        logger.info(f"[DEBUG] SendMsg返回结果: {send_result}, 内容长度: {len(content)}")
+                        if send_result:
                             logger.info(f"分段回复 {idx+1}/{len(message_actions)} 给 {sender_name}: {content[:50]}...")
                             if ENABLE_MEMORY and not is_system_message:
                                 log_ai_reply_to_memory(username, content)
@@ -2667,20 +2485,13 @@ def is_quiet_time():
 
 # 记忆管理功能
 def sanitize_user_id_for_filename(user_id):
-    """
-    将user_id转换为安全的文件名，支持中文字符。
-    """
+    """将user_id转换为安全的文件名，支持中文字符"""
     import re
     import string
     
     # 如果输入为空或None，返回默认值
     if not user_id:
         return "default_user"
-    
-    # 严格拒绝路径遍历序列
-    if '..' in user_id or '/' in user_id or '\\' in user_id:
-        logger.warning(f"检测到可疑的user_id，包含路径遍历字符: {user_id}")
-        return "suspicious_user"
     
     # 移除或替换危险字符，但保留中文字符
     # 危险字符：路径分隔符、控制字符、特殊符号等
@@ -2698,11 +2509,6 @@ def sanitize_user_id_for_filename(user_id):
     }
     if safe_name.upper() in windows_reserved:
         safe_name = f"user_{safe_name}"
-    
-    # 额外验证 - 确保结果是纯文件名，不包含路径分隔符
-    if os.path.sep in safe_name or (os.altsep and os.altsep in safe_name):
-        logger.error(f"清理后的文件名仍包含路径分隔符: {safe_name}")
-        return "error_user"
     
     # 如果结果为空，使用默认值
     if not safe_name:
@@ -3329,38 +3135,6 @@ def try_parse_and_set_reminder(message_content, user_id):
     """
     global next_timer_id # 引用全局变量，用于生成短期一次性提醒的ID
     logger.debug(f"尝试为用户 {user_id} 解析提醒请求 (需要识别类型和时长): '{message_content}'")
-    
-    # 长度限制
-    if len(message_content) > 1000:
-        logger.warning(f"提醒请求消息过长: {len(message_content)} 字符，用户: {user_id}")
-        error_msg = "提醒内容太长啦，请简短一些再试试~"
-        send_reply(user_id, user_id, user_id, "[提醒限制]", error_msg, is_system_message=True)
-        return False
-    
-    # 检查用户活动短期定时器数量
-    with timer_lock:
-        user_timer_count = sum(1 for (uid, _) in active_timers.keys() if uid == user_id)
-        if user_timer_count >= MAX_ACTIVE_TIMERS_PER_USER:
-            logger.warning(f"用户 {user_id} 的活动短期提醒已达上限: {user_timer_count}/{MAX_ACTIVE_TIMERS_PER_USER}")
-            error_msg = f"你的活动提醒数量已经达到上限啦（{MAX_ACTIVE_TIMERS_PER_USER}个），等之前的提醒完成后再设置新的吧~"
-            send_reply(user_id, user_id, user_id, "[提醒限制]", error_msg, is_system_message=True)
-            return False
-    
-    # 检查用户的重复提醒和一次性提醒数量
-    with recurring_reminder_lock:
-        user_recurring_count = sum(1 for r in recurring_reminders 
-                                  if r.get('user_id') == user_id 
-                                  and r.get('reminder_type') == 'recurring')
-        user_oneoff_count = sum(1 for r in recurring_reminders 
-                               if r.get('user_id') == user_id 
-                               and r.get('reminder_type') == 'one-off')
-        
-        # 如果已经达到任一限制，先提示用户（具体类型限制在后面再次检查）
-        if user_recurring_count >= MAX_RECURRING_REMINDERS_PER_USER and user_oneoff_count >= MAX_ONEOFF_REMINDERS_PER_USER:
-            logger.warning(f"用户 {user_id} 的所有类型提醒都已达上限")
-            error_msg = f"你的提醒数量已经很多啦，可以先删除一些再添加新的哦~"
-            send_reply(user_id, user_id, user_id, "[提醒限制]", error_msg, is_system_message=True)
-            return False
 
     try:
         # --- 1. 获取当前时间，准备给 AI 的上下文信息 ---
@@ -3436,11 +3210,6 @@ D) **非提醒请求**：例如 "今天天气怎么样?", "取消提醒"。
                 fallback = "嗯... 光设置时间还不行哦，得告诉我你要我提醒你做什么事呀？"
                 send_error_reply(user_id, error_prompt, fallback, "提醒内容为空")
                 return False
-            
-            # 限制提醒消息长度
-            if len(reminder_msg) > MAX_REMINDER_MESSAGE_LENGTH:
-                logger.warning(f"提醒消息过长: {len(reminder_msg)} 字符，已截断，用户: {user_id}")
-                reminder_msg = reminder_msg[:MAX_REMINDER_MESSAGE_LENGTH] + "..."
 
             # --- 6. 根据 AI 判断的类型分别处理 ---
 
@@ -3508,26 +3277,16 @@ D) **非提醒请求**：例如 "今天天气怎么样?", "取消提醒"。
 
                 logger.info(f"准备为用户 {user_id} 添加【长期一次性】提醒 (>10min)，目标时间: {target_datetime_str}，内容: '{reminder_msg}'")
 
-                # 检查用户长期一次性提醒数量限制
-                with recurring_reminder_lock:
-                    user_oneoff_count = sum(1 for r in recurring_reminders 
-                                           if r.get('user_id') == user_id 
-                                           and r.get('reminder_type') == 'one-off')
-                    if user_oneoff_count >= MAX_ONEOFF_REMINDERS_PER_USER:
-                        logger.warning(f"用户 {user_id} 的长期一次性提醒已达上限: {user_oneoff_count}/{MAX_ONEOFF_REMINDERS_PER_USER}")
-                        error_msg = f"你的一次性提醒数量已经达到上限啦（{MAX_ONEOFF_REMINDERS_PER_USER}个），可以先删除一些再添加新的哦~"
-                        send_reply(user_id, user_id, user_id, "[提醒限制]", error_msg, is_system_message=True)
-                        return False
-                    
-                    # 创建要存储的提醒信息字典 (包含类型)
-                    new_reminder = {
-                        "reminder_type": "one-off", # 在存储时统一用 'one-off'
-                        "user_id": user_id,
-                        "target_datetime_str": target_datetime_str, # 存储目标时间
-                        "content": reminder_msg
-                    }
+                # 创建要存储的提醒信息字典 (包含类型)
+                new_reminder = {
+                    "reminder_type": "one-off", # 在存储时统一用 'one-off'
+                    "user_id": user_id,
+                    "target_datetime_str": target_datetime_str, # 存储目标时间
+                    "content": reminder_msg
+                }
 
-                    # 添加到内存列表并保存到文件
+                # 添加到内存列表并保存到文件
+                with recurring_reminder_lock:
                     recurring_reminders.append(new_reminder)
                     save_recurring_reminders() # 保存更新后的列表
 
@@ -3560,18 +3319,16 @@ D) **非提醒请求**：例如 "今天天气怎么样?", "取消提醒"。
 
                 logger.info(f"准备为用户 {user_id} 添加【每日重复】提醒，时间: {time_str}，内容: '{reminder_msg}'")
 
+                # 创建要存储的提醒信息字典 (包含类型)
+                new_reminder = {
+                    "reminder_type": "recurring", # 明确类型
+                    "user_id": user_id,
+                    "time_str": time_str, # 存储 HH:MM
+                    "content": reminder_msg
+                }
+
                 # 添加到内存列表并保存到文件
                 with recurring_reminder_lock:
-                    # 检查用户每日重复提醒数量限制
-                    user_recurring_count = sum(1 for r in recurring_reminders 
-                                              if r.get('user_id') == user_id 
-                                              and r.get('reminder_type') == 'recurring')
-                    if user_recurring_count >= MAX_RECURRING_REMINDERS_PER_USER:
-                        logger.warning(f"用户 {user_id} 的每日重复提醒已达上限: {user_recurring_count}/{MAX_RECURRING_REMINDERS_PER_USER}")
-                        error_msg = f"你的每日提醒数量已经达到上限啦（{MAX_RECURRING_REMINDERS_PER_USER}个），可以先删除一些再添加新的哦~"
-                        send_reply(user_id, user_id, user_id, "[提醒限制]", error_msg, is_system_message=True)
-                        return False
-                    
                     # 检查是否已存在完全相同的重复提醒
                     exists = any(
                         r.get('reminder_type') == 'recurring' and
@@ -3581,13 +3338,6 @@ D) **非提醒请求**：例如 "今天天气怎么样?", "取消提醒"。
                         for r in recurring_reminders
                     )
                     if not exists:
-                        # 创建要存储的提醒信息字典 (包含类型)
-                        new_reminder = {
-                            "reminder_type": "recurring", # 明确类型
-                            "user_id": user_id,
-                            "time_str": time_str, # 存储 HH:MM
-                            "content": reminder_msg
-                        }
                         recurring_reminders.append(new_reminder)
                         save_recurring_reminders()
                         logger.info(f"【每日重复】提醒已添加并保存。用户: {user_id}, 时间: {time_str}, 内容: '{reminder_msg}'")
@@ -4312,16 +4062,8 @@ def scheduled_restart_checker():
                     clean_up_temp_files()
                     
                     logger.info("正在执行重启...")
-                    # 使用subprocess.Popen而不是os.execv，避免命令注入风险
-                    import subprocess
-                    current_script = os.path.abspath(__file__)
-                    # 只传递脚本路径，不传递sys.argv中可能存在的危险参数
-                    subprocess.Popen(
-                        [sys.executable, current_script],
-                        cwd=os.path.dirname(current_script)
-                    )
-                    logger.info("新进程已启动，当前进程即将退出")
-                    sys.exit(0)
+                    # 替换当前进程为新启动的 Python 脚本实例
+                    os.execv(sys.executable, ['python'] + sys.argv)
                 except Exception as e:
                     logger.error(f"执行重启操作时发生错误: {e}", exc_info=True)
                     # 如果重启失败，推迟下一次检查，避免短时间内连续尝试
@@ -4352,64 +4094,23 @@ def scheduled_restart_checker():
         time.sleep(60)
 
 # 发送心跳的函数
-# Waitress优化：创建心跳专用session，复用连接
-_heartbeat_session = None
-
-def _init_heartbeat_session():
-    """初始化心跳专用Session（连接池复用）"""
-    global _heartbeat_session
-    if _heartbeat_session is None:
-        _heartbeat_session = requests.Session()
-        # 配置连接池参数
-        adapter = requests.adapters.HTTPAdapter(
-            pool_connections=1,
-            pool_maxsize=2,
-            max_retries=0,
-            pool_block=False
-        )
-        _heartbeat_session.mount('http://', adapter)
-        _heartbeat_session.mount('https://', adapter)
-        # 设置请求头
-        _heartbeat_session.headers.update({
-            'User-Agent': 'WeChatBot-Heartbeat/2.0',
-            'Connection': 'keep-alive',
-            'Content-Type': 'application/json'
-        })
-    return _heartbeat_session
-
 def send_heartbeat():
-    """向Waitress服务器发送心跳信号（使用连接池复用）"""
+    """向Flask后端发送心跳信号"""
     heartbeat_url = f"{FLASK_SERVER_URL_BASE}/bot_heartbeat"
     payload = {
         'status': 'alive',
-        'pid': os.getpid()  # 发送当前进程PID，方便调试
+        'pid': os.getpid() # 发送当前进程PID，方便调试
     }
-    
     try:
-        session = _init_heartbeat_session()
-        # 使用更精确的超时设置（连接超时, 读取超时）
-        response = session.post(heartbeat_url, json=payload, timeout=(3, 5))
-        
+        response = requests.post(heartbeat_url, json=payload, timeout=5)
         if response.status_code == 200:
-            logger.debug(f"心跳发送成功至Waitress服务器 (PID: {os.getpid()})")
+            logger.debug(f"心跳发送成功至 {heartbeat_url} (PID: {os.getpid()})")
         else:
-            logger.warning(f"心跳响应异常，状态码: {response.status_code} (PID: {os.getpid()})")
-            
-    except requests.exceptions.Timeout:
-        logger.warning(f"心跳发送超时 - Waitress服务器可能繁忙 (PID: {os.getpid()})")
-        
-    except requests.exceptions.ConnectionError as e:
-        error_msg = str(e)
-        if 'Connection refused' in error_msg:
-            logger.error(f"无法连接到Waitress服务器 - 服务器可能未启动 (PID: {os.getpid()})")
-        else:
-            logger.error(f"心跳发送连接错误: {error_msg[:100]} (PID: {os.getpid()})")
-            
+            logger.warning(f"发送心跳失败，状态码: {response.status_code} (PID: {os.getpid()})")
     except requests.exceptions.RequestException as e:
-        logger.error(f"心跳发送网络错误: {str(e)[:100]} (PID: {os.getpid()})")
-        
+        logger.error(f"发送心跳时发生网络错误: {e} (PID: {os.getpid()})")
     except Exception as e:
-        logger.error(f"心跳发送未知错误: {str(e)[:100]} (PID: {os.getpid()})", exc_info=True)
+        logger.error(f"发送心跳时发生未知错误: {e} (PID: {os.getpid()})")
 
 
 # 心跳线程函数
@@ -4525,13 +4226,13 @@ def main():
         # --- 初始化 ---
         logger.info("\033[32m初始化微信接口和清理临时文件...\033[0m")
         clean_up_temp_files()
-        global wx
-        try:
-            wx = WeChat()
-            wx.Show()
-        except:
-            logger.error(f"\033[31m无法初始化微信接口，请确保您安装的是微信3.9版本，并且已经登录！\033[0m")
-            exit(1)
+        # global wx
+        # try:
+        #     wx = WeChat()
+        #     wx.Show()
+        # except:
+        #     logger.error(f"\033[31m无法初始化微信接口，请确保您安装的是微信3.9版本，并且已经登录！\033[0m")
+        #     exit(1)
 
         for user_name in user_names:
             if user_name == ROBOT_WX_NAME:
@@ -4574,7 +4275,7 @@ def main():
         global program_start_time, last_received_message_timestamp
         program_start_time = time.time()
         last_received_message_timestamp = time.time()
-        if ENABLE_SCHEDULED_RESTART:
+        if False and ENABLE_SCHEDULED_RESTART:  # 暂时禁用定时重启功能
             restart_checker_thread = threading.Thread(target=scheduled_restart_checker, name="ScheduledRestartChecker")
             restart_checker_thread.daemon = True # 设置为守护线程，主程序退出时它也会退出
             restart_checker_thread.start()
@@ -4613,6 +4314,15 @@ def main():
         monitor_memory_usage_thread.daemon = True
         monitor_memory_usage_thread.start()
         logger.info("内存使用监控线程已启动。")
+
+                # 防止系统休眠
+        try:
+            ES_CONTINUOUS = 0x80000000
+            ES_SYSTEM_REQUIRED = 0x00000001
+            ctypes.windll.kernel32.SetThreadExecutionState(ES_CONTINUOUS | ES_SYSTEM_REQUIRED)
+            logger.info("已设置防止系统休眠。")
+        except Exception as e:
+            logger.warning(f"设置防止系统休眠失败: {e}")
 
         wx.KeepRunning()
 
@@ -4656,16 +4366,15 @@ def main():
                  logger.info("异步HTTP日志处理器已关闭。")
             except Exception as log_close_err:
                  logger.error(f"关闭异步日志处理器时出错: {log_close_err}")
-        
-        # 关闭心跳Session，释放Waitress连接
-        global _heartbeat_session
-        if _heartbeat_session is not None:
-            logger.info("正在关闭心跳连接池...")
-            try:
-                _heartbeat_session.close()
-                logger.info("心跳连接池已关闭 [Waitress]")
-            except Exception as hb_close_err:
-                logger.error(f"关闭心跳连接池时出错: {hb_close_err}")
+
+
+        # 恢复系统休眠设置
+        try:
+            ES_CONTINUOUS = 0x80000000
+            ctypes.windll.kernel32.SetThreadExecutionState(ES_CONTINUOUS)
+            logger.info("已恢复系统休眠设置。")
+        except Exception as e:
+            logger.warning(f"恢复系统休眠设置失败: {e}")
 
         logger.info("执行最终临时文件清理...")
         clean_up_temp_files()

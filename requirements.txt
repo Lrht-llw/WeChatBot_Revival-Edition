@@ -1,8 +1,5 @@
 flask
 flask-cors
-flask-wtf
-flask-limiter
-sqlalchemy~=2.0.37
 comtypes
 Pillow
 typing-extensions
@@ -16,4 +13,3 @@ filelock
 requests
 beautifulsoup4
 lxml
-waitress

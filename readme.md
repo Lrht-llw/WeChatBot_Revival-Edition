@@ -5,7 +5,7 @@
 - 本机器人致力于实现更加拟人化聊天效果，支持多种功能。
 
 # 效果展示
-<img src="Demo_Image/1.png" alt="示例图片1" width="300px">
+<img src="Demo_Image/1.png" alt="示例图片1" width="900px">
 <img src="Demo_Image/2.png" alt="示例图片2" width="300px">
 <img src="Demo_Image/3.png" alt="示例图片2" width="300px">
 <img src="Demo_Image/4.png" alt="示例图片3" width="900px">

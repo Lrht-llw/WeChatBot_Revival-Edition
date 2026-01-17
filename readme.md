@@ -64,3 +64,57 @@
 - **依赖库**：项目使用私有授权的微信自动化库作为可选增强功能，并提供开源备选方案
 - **合规性**：详细的许可证合规性说明请参阅 [DEPENDENCIES.txt](DEPENDENCIES.txt)
 - **用户权利**：无论使用哪种依赖库，用户都享有完整的GPL-3.0自由软件权利
+
+---
+
+## 💖 支持我们
+
+<div align="center">
+  <!-- 项目星标 -->
+  <p>点击星星助力项目成长 ⭐️ → 
+    <a href="https://github.com/Lrht-llw/WeChatBot_Revival-Edition">
+      <img src="" alt="GitHub Stars">
+    </a>
+  </p>
+
+<!-- 资金用途 -->
+
+<p style="margin:18px 0 10px; font-size:0.95em">
+    🎯 您的支持将用于：<br>
+    🚀 服务器费用 • 🌸 API资源 • 🛠️ 功能开发 • 💌 社区运营
+  </p>
+
+<!-- 赞助二维码 -->
+
+<img src="./赞助.jpg" width="450" alt="支持二维码" style="border:3px solid #eee; border-radius:12px">
+
+<!-- 神秘计划模块 -->
+
+<div style="font-size:0.88em; line-height:1.3; max-width:540px; margin:15px auto;
+              background: linear-gradient(145deg, rgba(255,105,180,0.08), rgba(156,39,176,0.05));
+              padding:10px 15px; border-radius:6px; border:1px solid rgba(255,105,180,0.15)">
+    <span style="color: #9c27b0">🔒 神秘赞助计划：</span>
+    <span style="margin-left:6px; letter-spacing:-0.5px">
+      <i class="fa fa-lock" style="color: #ff4081; margin-right:4px"></i>
+      <span style="background: linear-gradient(45deg, #ff69b4, #9c27b0); -webkit-background-clip: text; color: transparent">
+        限定数字藏品·开发者礼包·神秘周边·▮▮▮▮
+      </span>
+    </span>
+  </div>
+
+<!-- 动态徽章 -->
+
+<div style="margin:18px 0 8px">
+    <img src="https://img.shields.io/badge/已解锁成就-▮▮▮▮▮▮-ff69b4?style=flat-square&logo=starship">
+    <img src="https://img.shields.io/badge/特别鸣谢-▮▮▮▮▮▮-9c27b0?style=flat-square&logo=heart">
+  </div>
+</div>
+
+---
+
+### 通过其他方式联系我们
+
+- **QQ**：2179725762
+- **视频教程**：[哔哩哔哩频道](https://space.bilibili.com/1235649129)
+- **更多方式**：[官网](http://www.lrht.cc)
+---

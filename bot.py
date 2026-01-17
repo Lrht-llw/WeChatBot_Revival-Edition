@@ -2,7 +2,7 @@
 
 # ***********************************************************************
 # Modified based on the KouriChat project
-# Copyright of this modification: Copyright (C) 2025, iwyxdxl
+# Copyright of this modification: Copyright (C) 2026, Lrht-llw
 # Licensed under GNU GPL-3.0 or higher, see the LICENSE file for details.
 # 
 # This file is part of WeChatBot, which includes modifications to the KouriChat project.
@@ -32,7 +32,7 @@ from bs4 import BeautifulSoup
 from urllib.parse import urlparse
 import os
 import ctypes
-os.environ["PROJECT_NAME"] = 'iwyxdxl/WeChatBot_WXAUTO_SE'
+os.environ["PROJECT_NAME"] = 'Lrht-llw/WeChatBot_WXAUTO_SE'
 try:
     from wxautox4_wechatbot import WeChat
     from wxautox4_wechatbot.param import WxParam

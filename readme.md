@@ -86,7 +86,7 @@
 
 <!-- 赞助二维码 -->
 
-<img src="./赞助.jpg" width="450" alt="支持二维码" style="border:3px solid #eee; border-radius:12px">
+<img src="https://raw.githubusercontent.com/Lrht-llw/WeChatBot_Revival-Edition/refs/heads/main/Demo_Image/%E8%B5%9E%E5%8A%A9.jpg" width="450" alt="支持二维码" style="border:3px solid #eee; border-radius:12px">
 
 <!-- 神秘计划模块 -->
 

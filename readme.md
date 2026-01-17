@@ -6,8 +6,8 @@
 
 # 效果展示
 <img src="Demo_Image/1.png" alt="示例图片1" width="900px">
-<img src="Demo_Image/2.png" alt="示例图片2" width="300px">
-<img src="Demo_Image/3.png" alt="示例图片2" width="300px">
+<img src="Demo_Image/2.jpg" alt="示例图片2" width="300px">
+<img src="Demo_Image/3.jpg" alt="示例图片2" width="300px">
 <img src="Demo_Image/4.png" alt="示例图片3" width="900px">
 <img src="Demo_Image/5.png" alt="示例图片4" width="900px">
 

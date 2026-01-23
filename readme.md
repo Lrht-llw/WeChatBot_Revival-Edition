@@ -4,6 +4,9 @@
 - 本项目由Lrht-llw在原项目基础上修改创建。
 - 本机器人致力于实现更加拟人化聊天效果，支持多种功能。
 
+# 重要说明
+-libs文件夹下的文件可以通过解压软件解压
+
 # 效果展示
 <img src="Demo_Image/1.png" alt="示例图片1" width="900px">
 <img src="Demo_Image/2.jpg" alt="示例图片2" width="300px">

@@ -35,7 +35,8 @@
 13. 特色功能 - 角色论坛
 14. 指令功能
 
-# 使用前准备
+## 🚀 快速开始
+### 使用前准备
 1. 请先安装python、pip，python版本应大于3.8
 2. 申请大模型API,推荐WeAPIs https://vg.v1api.cc/register?aff=4eq3
 
@@ -64,6 +65,12 @@
 - **依赖库**：项目使用私有授权的微信自动化库作为可选增强功能，并提供开源备选方案
 - **合规性**：详细的许可证合规性说明请参阅 [DEPENDENCIES.txt](DEPENDENCIES.txt)
 - **用户权利**：无论使用哪种依赖库，用户都享有完整的GPL-3.0自由软件权利
+
+# 开发说明
+```bash
+# 环境配置
+python -m pip install -r requirements.txt
+```
 
 ---
 

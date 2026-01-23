@@ -12,7 +12,7 @@
 <img src="Demo_Image/5.png" alt="示例图片4" width="900px">
 
 # 版本号
-- v3.25.1 (2026年1月2日)
+- v3.26.1 (2026年1月2日)
   - 更新了对新版微信的支持，修复了一些在新版微信中出现的问题（微信4.0以上）
 
 # 目前支持的功能
@@ -33,7 +33,7 @@
 
 # 使用前准备
 1. 请先安装python、pip，python版本应大于3.8
-2. 申请大模型API,推荐WeAPIs https://vg.v1api.cc/register?aff=Rf3h
+2. 申请大模型API,推荐WeAPIs https://vg.v1api.cc/register?aff=4eq3
 
 # 快速上手
 1. 登录电脑微信，确保在后台运行
@@ -44,10 +44,6 @@
 6. 回到配置编辑器页面，填入微信昵称或群聊名称，并选择对应提示词
 7. 修改完配置后点击页面右上角'Start Bot'启动程序
 8. 如果想要自定义表情包请将表情包(.gif .png .jpg .jpeg)文件放入emojis文件夹中对应的情绪文件夹内（可以自己添加情绪种类）
-
-# 联系我
-1. 邮箱 2179725762@qq.com
-2. QQ 2179725762
 
 # 声明
 - 本项目基于 [KouriChat](https://github.com/KouriChat/KouriChat) 修改(原My-Dream-Moments项目)，遵循 **GNU GPL-3.0 或更高版本** 许可证，原项目版权归属：umaru (2025)。
@@ -71,10 +67,7 @@
 
 <div align="center">
   <!-- 项目星标 -->
-  <p>点击星星助力项目成长 ⭐️ → 
-    <a href="https://github.com/Lrht-llw/WeChatBot_Revival-Edition">
-      <img src="" alt="GitHub Stars">
-    </a>
+  <p>点击星星助力项目成长 ⭐️ 
   </p>
 
 <!-- 资金用途 -->
@@ -97,7 +90,7 @@
     <span style="margin-left:6px; letter-spacing:-0.5px">
       <i class="fa fa-lock" style="color: #ff4081; margin-right:4px"></i>
       <span style="background: linear-gradient(45deg, #ff69b4, #9c27b0); -webkit-background-clip: text; color: transparent">
-        限定数字藏品·开发者礼包·神秘周边·▮▮▮▮
+        暂时还没有想好...
       </span>
     </span>
   </div>

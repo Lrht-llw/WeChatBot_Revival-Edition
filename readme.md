@@ -1,3 +1,7 @@
+<div align="center">
+
+<img src="https://raw.githubusercontent.com/Lrht-llw/Vue-xun_My_music/refs/heads/master/screenshots/1755518898514.jpg" alt="Logo" width="80" height="80">
+
 # ⚠️重要说明
   - libs文件夹下的文件可以通过解压软件解压-并没有夹带私货（病毒）
   - 这是一个智能微信聊天机器人。通过wxautox_wechatbot收发微信消息，调用deepseek、gpt、gemini等大语言模型生成回复消息。
@@ -6,11 +10,17 @@
   - 本机器人致力于实现更加拟人化聊天效果，支持多种功能。
 
 # 🌟效果展示
+
+<details>
+<summary>展开查看</summary>
+<pre><code>
 <img src="Demo_Image/1.png" alt="示例图片1" width="900px">
 <img src="Demo_Image/2.jpg" alt="示例图片2" width="300px">
 <img src="Demo_Image/3.jpg" alt="示例图片2" width="300px">
 <img src="Demo_Image/4.png" alt="示例图片3" width="900px">
 <img src="Demo_Image/5.png" alt="示例图片4" width="900px">
+</code></pre>
+</details>
 
 # ©️版本号
 - v3.26.1 (2026年1月2日)

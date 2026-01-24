@@ -2,6 +2,8 @@
 
 <img src="https://raw.githubusercontent.com/Lrht-llw/Vue-xun_My_music/refs/heads/master/screenshots/1755518898514.jpg" alt="Logo" width="80" height="80">
 
+</div>
+
 # ⚠️重要说明
   - libs文件夹下的文件可以通过解压软件解压-并没有夹带私货（病毒）
   - 这是一个智能微信聊天机器人。通过wxautox_wechatbot收发微信消息，调用deepseek、gpt、gemini等大语言模型生成回复消息。

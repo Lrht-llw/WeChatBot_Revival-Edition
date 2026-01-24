@@ -15,11 +15,13 @@
 
 <details>
 <summary>展开查看</summary>
+<pre><code>
 <img src="https://raw.githubusercontent.com/Lrht-llw/WeChatBot_Revival-Edition/refs/heads/main/Demo_Image/1.png" alt="示例图片1" width="900px">
-<img src="https://raw.githubusercontent.com/Lrht-llw/WeChatBot_Revival-Edition/refs/heads/main/Demo_Image/2.png" alt="示例图片2" width="300px">
+<img src="https://raw.githubusercontent.com/Lrht-llw/WeChatBot_Revival-Edition/refs/heads/main/Demo_Image/2.jpg" alt="示例图片2" width="300px">
 <img src="https://raw.githubusercontent.com/Lrht-llw/WeChatBot_Revival-Edition/refs/heads/main/Demo_Image/3.jpg" alt="示例图片2" width="300px">
 <img src="https://raw.githubusercontent.com/Lrht-llw/WeChatBot_Revival-Edition/refs/heads/main/Demo_Image/4.png" alt="示例图片3" width="900px">
 <img src="https://raw.githubusercontent.com/Lrht-llw/WeChatBot_Revival-Edition/refs/heads/main/Demo_Image/5.png" alt="示例图片4" width="900px">
+</code></pre>
 </details>
 
 # ©️版本号
@@ -29,8 +31,8 @@
 
 ### 🚀 快速开始
   # 使用前准备
-    1. 请先安装python、pip，python版本应大于3.8
-    2. 申请大模型API,推荐 [WeAPIs](https://vg.v1api.cc/register?aff=4eq3)
+    - 请先安装python、pip，python版本应大于3.8
+    - 申请大模型API,推荐 [WeAPIs](https://vg.v1api.cc/register?aff=4eq3)
   # 快速配置
     1. 登录电脑微信，确保在后台运行
     2. 运行 Run.bat 启动程序，等待自动安装依赖文件

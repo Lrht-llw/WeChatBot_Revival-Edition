@@ -16,11 +16,11 @@
 <details>
 <summary>展开查看</summary>
 <pre><code>
-<img src="Demo_Image/1.png" alt="示例图片1" width="900px">
-<img src="Demo_Image/2.jpg" alt="示例图片2" width="300px">
-<img src="Demo_Image/3.jpg" alt="示例图片2" width="300px">
-<img src="Demo_Image/4.png" alt="示例图片3" width="900px">
-<img src="Demo_Image/5.png" alt="示例图片4" width="900px">
+<img src="https://raw.githubusercontent.com/Lrht-llw/WeChatBot_Revival-Edition/refs/heads/main/Demo_Image/1.png" alt="示例图片1" width="900px">
+<img src="https://raw.githubusercontent.com/Lrht-llw/WeChatBot_Revival-Edition/refs/heads/main/Demo_Image/2.png" alt="示例图片2" width="300px">
+<img src="https://raw.githubusercontent.com/Lrht-llw/WeChatBot_Revival-Edition/refs/heads/main/Demo_Image/3.jpg" alt="示例图片2" width="300px">
+<img src="https://raw.githubusercontent.com/Lrht-llw/WeChatBot_Revival-Edition/refs/heads/main/Demo_Image/4.png" alt="示例图片3" width="900px">
+<img src="https://raw.githubusercontent.com/Lrht-llw/WeChatBot_Revival-Edition/refs/heads/main/Demo_Image/5.png" alt="示例图片4" width="900px">
 </code></pre>
 </details>
 

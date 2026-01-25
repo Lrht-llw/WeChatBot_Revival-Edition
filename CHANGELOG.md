@@ -1,6 +1,6 @@
 # 更新日志 / CHANGELOG
 
-本文件记录了WeChatBot_WXAUTO_SE相对于原始KouriChat项目的主要修改历史。
+本文件记录了WeChatBot_Revival-Edition相对于原始KouriChat项目的主要修改历史。
 
 ## 重要说明
 - 本项目基于KouriChat项目进行了大量修改和重构

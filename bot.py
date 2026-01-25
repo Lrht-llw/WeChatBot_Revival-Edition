@@ -32,7 +32,7 @@ from bs4 import BeautifulSoup
 from urllib.parse import urlparse
 import os
 import ctypes
-os.environ["PROJECT_NAME"] = 'Lrht-llw/WeChatBot_WXAUTO_SE'
+os.environ["PROJECT_NAME"] = 'Lrht-llw/WeChatBot_Revival-Edition'
 try:
     from wxautox4_wechatbot import WeChat
     from wxautox4_wechatbot.param import WxParam

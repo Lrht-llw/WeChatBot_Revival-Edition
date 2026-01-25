@@ -2,7 +2,7 @@
 
 ## 项目许可证 / Project License
 
-WeChatBot_WXAUTO_SE 遵循 **GNU GPL-3.0 或更高版本** 许可证。
+WeChatBot_Revival-Edition 遵循 **GNU GPL-3.0 或更高版本** 许可证。
 
 ## 依赖库许可证 / Dependencies License
 

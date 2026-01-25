@@ -1,7 +1,7 @@
 第三方依赖许可证信息 / Third-Party Dependencies License Information
 ================================================================
 
-本文件列出了WeChatBot_WXAUTO_SE项目使用的所有第三方依赖及其许可证信息。
+本文件列出了WeChatBot_Revival-Edition项目使用的所有第三方依赖及其许可证信息。
 除特殊说明外，所有列出的许可证均与GPL-3.0兼容。
 
 ⚠️ 特殊依赖说明 / Special Dependencies Notice:

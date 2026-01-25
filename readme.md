@@ -1,6 +1,15 @@
 <div align="center">
 
-<img src="https://raw.githubusercontent.com/Lrht-llw/Vue-xun_My_music/refs/heads/master/screenshots/1755518898514.jpg" alt="Logo" width="80" height="80">
+<img src="https://raw.githubusercontent.com/Lrht-llw/WeChatBot_Revival-Edition/refs/heads/master/screenshots/1755518898514.jpg" alt="Logo" width="80" height="80">
+
+# WeChatBot_Revival-Edition
+
+[![Stars](https://img.shields.io/github/stars/Lrht-llw/WeChatBot_Revival-Edition?style=flat&logo=data:image/svg%2bxml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZlcnNpb249IjEiIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiI+PHBhdGggZD0iTTggLjI1YS43NS43NSAwIDAgMSAuNjczLjQxOGwxLjg4MiAzLjgxNSA0LjIxLjYxMmEuNzUuNzUgMCAwIDEgLjQxNiAxLjI3OWwtMy4wNDYgMi45Ny43MTkgNC4xOTJhLjc1MS43NTEgMCAwIDEtMS4wODguNzkxTDggMTIuMzQ3bC0zLjc2NiAxLjk4YS43NS43NSAwIDAgMS0xLjA4OC0uNzlsLjcyLTQuMTk0TC44MTggNi4zNzRhLjc1Ljc1IDAgMCAxIC40MTYtMS4yOGw0LjIxLS42MTFMNy4zMjcuNjY4QS43NS43NSAwIDAgMSA4IC4yNVoiIGZpbGw9IiNlYWM1NGYiLz48L3N2Zz4=&logoSize=auto&label=stars&labelColor=444444&color=eac54f)](https://github.com/Lrht-llw/WeChatBot_Revival-Edition/)
+[![Issues](https://img.shields.io/github/issues/Lrht-llw/WeChatBot_Revival-Edition?style=flat&label=issues&labelColor=444444&color=1F883D&logo=github)](https://github.com/Lrht-llw/WeChatBot_Revival-Edition/issues)
+[![Pull requests](https://img.shields.io/github/issues-pr/Lrht-llw/WeChatBot_Revival-Edition?style=flat&label=pull%20requests&labelColor=444444&color=1F883D&logo=github)](https://github.com/Lrht-llw/WeChatBot_Revival-Edition/pulls)
+![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/Lrht-llw/WeChatBot_Revival-Edition/total)
+[![哔哩哔哩](https://img.shields.io/badge/动态-bilibili-00A4DB?style=flat&labelColor=444444&logo=bilibili)](https://space.bilibili.com/1235649129/dynamic) <br />
+[提交问题](https://github.com/Lrht-llw/WeChatBot_Revival-Edition/issues/new/choose)
 
 </div>
 
@@ -11,7 +20,7 @@
   - 本项目由Lrht-llw在原项目基础上修改创建。
   - 本机器人致力于实现更加拟人化聊天效果，支持多种功能。
 
-# 🌟效果展示
+## 🌟效果展示
 
 <details>
 <summary>展开查看</summary>
@@ -24,12 +33,12 @@
 </code></pre>
 </details>
 
-# ©️版本号
+## ©️版本号
 - v3.26.1 (2026年1月2日)
   - 更新了对新版微信的支持，修复了一些在新版微信中出现的问题（微信4.0以上）
 - [更多版本信息](https://github.com/Lrht-llw/WeChatBot_Revival-Edition/blob/main/CHANGELOG.md)
 
-# 🚀 快速开始
+## 🚀 快速开始
 ### 使用前准备
   - 请先安装python、pip，python版本应大于3.8
   - 申请大模型API,推荐 [WeAPIs](https://vg.v1api.cc/register?aff=4eq3)
@@ -75,7 +84,7 @@
 
 ---
 
-### 📜声明
+## 📜声明
 - 本项目基于 [KouriChat](https://github.com/KouriChat/KouriChat) 修改(原My-Dream-Moments项目)，遵循 **GNU GPL-3.0 或更高版本** 许可证，原项目版权归属：umaru (2025)。
 - **修改说明**：本项目在2026年期间对原始代码进行了大量修改和重构，包括但不限于：
   - 完全重写了用户界面和配置系统
@@ -91,7 +100,7 @@
     - **合规性**：详细的许可证合规性说明请参阅 [DEPENDENCIES.txt](DEPENDENCIES.txt)
     - **用户权利**：无论使用哪种依赖库，用户都享有完整的GPL-3.0自由软件权利
 
-# 🧑‍💻开发说明
+## 🧑‍💻开发说明
 ```bash
   # 环境配置
     python -m pip install -r requirements.txt
@@ -129,19 +138,18 @@
         暂时还没有想好...
       </span>
     </span>
-  </div>
+</div>
 
 <!-- 动态徽章 -->
 
 <div style="margin:18px 0 8px">
     <img src="https://img.shields.io/badge/已解锁成就-▮▮▮▮▮▮-ff69b4?style=flat-square&logo=starship">
     <img src="https://img.shields.io/badge/特别鸣谢-▮▮▮▮▮▮-9c27b0?style=flat-square&logo=heart">
-  </div>
 </div>
 
 ---
 
-### 通过其他方式联系我们
+## 联系我们
 
 - **QQ**：2179725762
 - **视频教程**：[哔哩哔哩频道](https://space.bilibili.com/1235649129)

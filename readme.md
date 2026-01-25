@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="https://raw.githubusercontent.com/Lrht-llw/WeChatBot_Revival-Edition/refs/heads/master/screenshots/1755518898514.jpg" alt="Logo" width="80" height="80">
+<img src="https://raw.githubusercontent.com/Lrht-llw/WeChatBot_Revival-Edition/refs/heads/main/Demo_Image/6.png" alt="Logo" width="80" height="80">
 
 # WeChatBot_Revival-Edition
 
@@ -13,12 +13,12 @@
 
 </div>
 
-# ⚠️重要说明
-  - libs文件夹下的文件可以通过解压软件解压-并没有夹带私货（病毒）
-  - 这是一个智能微信聊天机器人。通过wxautox_wechatbot收发微信消息，调用deepseek、gpt、gemini等大语言模型生成回复消息。
+这是一个智能微信聊天机器人。通过wxautox_wechatbot收发微信消息，调用deepseek、gpt、gemini等大语言模型生成回复消息。本机器人致力于实现更加拟人化聊天效果，支持多种功能。
+
+## ⚠️重要说明
+  - libs文件夹下的文件可以通过解压软件解压-并没有夹带私货
   - 原项目仓库：https://github.com/KouriChat/KouriChat
   - 本项目由Lrht-llw在原项目基础上修改创建。
-  - 本机器人致力于实现更加拟人化聊天效果，支持多种功能。
 
 ## 🌟效果展示
 
@@ -36,7 +36,7 @@
 ## ©️版本号
 - v3.26.1 (2026年1月2日)
   - 更新了对新版微信的支持，修复了一些在新版微信中出现的问题（微信4.0以上）
-- [更多版本信息](https://github.com/Lrht-llw/WeChatBot_Revival-Edition/blob/main/CHANGELOG.md)
+- [更多版本信息](CHANGELOG.md)
 
 ## 🚀 快速开始
 ### 使用前准备
@@ -51,6 +51,21 @@
   6. 回到配置编辑器页面，填入微信昵称或群聊名称，并选择对应提示词
   7. 修改完配置后点击页面右上角'Start Bot'启动程序
   8. 如果想要自定义表情包请将表情包(.gif .png .jpg .jpeg)文件放入emojis文件夹中对应的情绪文件夹内（可以自己添加情绪种类）
+
+### 💻 支持平台
+
+| 操作系统 | 支持版本 | 环境要求 | 技术支持 |
+|---|---|---|---|
+| Windows 10 1809 (17763) 或更高 | [最新版](https://github.com/Lrht-llw/WeChatBot_Revival-Edition/releases) | python、pip，python版本应大于3.8 | ✅ 完整支持 |
+| Windows 8 - Windows 10 1809- (17763-) | [最新版](https://github.com/Lrht-llw/WeChatBot_Revival-Edition/releases) | python、pip，python版本应大于3.8 | ✅ 完整支持 |
+| Windows 7 或更低版本 | [**](*) | [**](*) | ⚠️ 待测试 |
+| macOS / Linux / 其他操作系统 | 暂不支持 | 无 | ❌ 不支持 |
+
+## 🧑‍💻开发说明
+```bash
+  # 环境配置
+    python -m pip install -r requirements.txt
+```
 
 ---
 
@@ -93,23 +108,26 @@
   - 添加了大量新特性如情绪识别、定时任务、联网搜索等
   - 由于修改范围广泛且深入，无法精确标注每处修改的具体日期，但所有修改均在上述时间段内完成。
   - 本修改版本保持与原项目相同的GPL-3.0许可证，确保用户享有相同的自由软件权利。
+    
+## 🔒 许可证和依赖说明
 
-  ## 许可证和依赖说明
-    - **主许可证**：GNU GPL-3.0 或更高版本
-    - **依赖库**：项目使用私有授权的微信自动化库作为可选增强功能，并提供开源备选方案
-    - **合规性**：详细的许可证合规性说明请参阅 [DEPENDENCIES.txt](DEPENDENCIES.txt)
-    - **用户权利**：无论使用哪种依赖库，用户都享有完整的GPL-3.0自由软件权利
-
-## 🧑‍💻开发说明
-```bash
-  # 环境配置
-    python -m pip install -r requirements.txt
-```
+- `WeChatBot_Revival-Edition/` 使用 [GNU GPL-3.0 或更高版本](https://github.com/Lrht-llw/WeChatBot_Revival-Edition/blob/main/LICENSE)
+- `依赖库` 项目使用私有授权的微信自动化库作为可选增强功能，并提供开源备选方案
+- `合规性` 详细的许可证合规性说明请参阅 [DEPENDENCIES.txt](DEPENDENCIES.txt)
+- `用户权利` 无论使用哪种依赖库，用户都享有完整的GPL-3.0自由软件权利
 
 ---
+## 🌟 统计数据
+![Alt](https://repobeats.axiom.co/api/embed/30db6cc6079208478e4bb382234b55ee47f7c9e4.svg "Repobeats analytics image")
+
+[![Star History Chart](https://api.star-history.com/svg?repos=Lrht-llw/WeChatBot_Revival-Edition&type=Date)](https://www.star-history.com/#Lrht-llw/WeChatBot_Revival-Edition&Date)
+
+**此页浏览量**（总计 / 今日）：[![Hits](https://hits.zkitefly.eu.org/?tag=https://github.com/Lrht-llw/WeChatBot_Revival-Edition)](https://hits.zkitefly.eu.org/?tag=https://github.com/Lrht-llw/WeChatBot_Revival-Edition&web=true)
+## ❤️ 贡献者
+
+[![](https://contrib.rocks/image?repo=Lrht-llw/WeChatBot_Revival-Edition)](https://github.com/Lrht-llw/WeChatBot_Revival-Edition/graphs/contributors)
 
 ## 💖 支持我们
-
 <div align="center">
   <!-- 项目星标 -->
   <p>点击星星助力项目成长 ⭐️ 
@@ -125,33 +143,3 @@
 <!-- 赞助二维码 -->
 
 <img src="https://raw.githubusercontent.com/Lrht-llw/WeChatBot_Revival-Edition/refs/heads/main/Demo_Image/%E8%B5%9E%E5%8A%A9.jpg" width="450" alt="支持二维码" style="border:3px solid #eee; border-radius:12px">
-
-<!-- 神秘计划模块 -->
-
-<div style="font-size:0.88em; line-height:1.3; max-width:540px; margin:15px auto;
-              background: linear-gradient(145deg, rgba(255,105,180,0.08), rgba(156,39,176,0.05));
-              padding:10px 15px; border-radius:6px; border:1px solid rgba(255,105,180,0.15)">
-    <span style="color: #9c27b0">🔒 神秘赞助计划：</span>
-    <span style="margin-left:6px; letter-spacing:-0.5px">
-      <i class="fa fa-lock" style="color: #ff4081; margin-right:4px"></i>
-      <span style="background: linear-gradient(45deg, #ff69b4, #9c27b0); -webkit-background-clip: text; color: transparent">
-        暂时还没有想好...
-      </span>
-    </span>
-</div>
-
-<!-- 动态徽章 -->
-
-<div style="margin:18px 0 8px">
-    <img src="https://img.shields.io/badge/已解锁成就-▮▮▮▮▮▮-ff69b4?style=flat-square&logo=starship">
-    <img src="https://img.shields.io/badge/特别鸣谢-▮▮▮▮▮▮-9c27b0?style=flat-square&logo=heart">
-</div>
-
----
-
-## 联系我们
-
-- **QQ**：2179725762
-- **视频教程**：[哔哩哔哩频道](https://space.bilibili.com/1235649129)
-- **更多方式**：[官网](http://www.lrht.cc)
----
